@@ -1,0 +1,93 @@
+{
+    "kind": "collectionType",
+    "collectionName": "playlists",
+    "info": {
+        "singularName": "playlist",
+        "pluralName": "playlists",
+        "displayName": "Playlist",
+        "description": ""
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "playlist_name": {
+            "type": "string",
+            "required": true
+        },
+        "status": {
+            "type": "enumeration",
+            "enum": [
+                "pending",
+                "complete",
+                "playing"
+            ],
+            "default": "pending",
+            "required": true
+        },
+        "priority": {
+            "type": "boolean",
+            "default": false,
+            "required": true
+        },
+        "type": {
+            "type": "enumeration",
+            "enum": [
+                "mp3",
+                "online",
+                "text"
+            ],
+            "required": true
+        },
+        "repeat": {
+            "type": "enumeration",
+            "enum": [
+                "no",
+                "every_day",
+                "day_in_week",
+                "date_in_month"
+            ],
+            "default": "no",
+            "required": true
+        },
+        "repeat_schedule": {
+            "type": "json"
+        },
+        "date": {
+            "type": "biginteger"
+        },
+        "time_start": {
+            "type": "biginteger"
+        },
+        "time_end": {
+            "type": "biginteger"
+        },
+        "locations": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "plugin::radio.location"
+        },
+        "media": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "plugin::radio.media"
+        },
+        "source": {
+            "type": "text"
+        },
+        "note": {
+            "type": "string"
+        },
+        "user_created": {
+            "type": "relation",
+            "relation": "oneToOne",
+            "target": "plugin::radio.user"
+        },
+        "playlists_exist": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "plugin::radio.playlist"
+        }
+    }
+}

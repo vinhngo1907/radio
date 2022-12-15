@@ -1,0 +1,46 @@
+{
+    "kind": "collectionType",
+    "collectionName": "text_to_speed_callbacks",
+    "info": {
+        "singularName": "texttospeedcallback",
+        "pluralName": "texttospeedcallbacks",
+        "displayName": "Text to speech Callback",
+        "description": ""
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "app_id": {
+            "type": "string"
+        },
+        "request_id": {
+            "type": "string"
+        },
+        "voice_code": {
+            "type": "string"
+        },
+        "audio_type": {
+            "type": "string"
+        },
+        "speed_rate": {
+            "type": "string"
+        },
+        "sample_rate": {
+            "type": "string"
+        },
+        "status": {
+            "type": "string"
+        },
+        "audio_link": {
+            "type": "text"
+        },
+        "characters": {
+            "type": "integer"
+        },
+        "bitrate": {
+            "type": "integer"
+        }
+    }
+}

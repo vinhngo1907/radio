@@ -1,0 +1,65 @@
+{
+    "kind": "collectionType",
+    "collectionName": "devices",
+    "info": {
+        "singularName": "device",
+        "pluralName": "devices",
+        "displayName": "Device",
+        "description": ""
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "device_name": {
+            "type": "string",
+            "required": true,
+            "unique": false
+        },
+        "status": {
+            "type": "enumeration",
+            "enum": [
+                "active",
+                "pending",
+                "pause",
+                "stop",
+                "error"
+            ],
+            "default": "pending",
+            "required": true
+        },
+        "device_id": {
+            "type": "string",
+            "required": true,
+            "unique": true
+        },
+        "device_model": {
+            "type": "string",
+            "required": true
+        },
+        "meta": {
+            "type": "string",
+            "required": true
+        },
+        "phone_number": {
+            "type": "string",
+            "required": true
+        },
+        "device_key": {
+            "type": "string",
+            "required": true,
+            "unique": false
+        },
+        "locations": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "plugin::radio.location"
+        },
+        "user_created": {
+            "type": "relation",
+            "relation": "oneToOne",
+            "target": "plugin::radio.user"
+          }
+    }
+}

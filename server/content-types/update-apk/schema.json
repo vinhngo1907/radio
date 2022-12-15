@@ -1,0 +1,41 @@
+{
+    "kind": "singleType",
+    "collectionName": "update_apks",
+    "info": {
+        "singularName": "updateapk",
+        "pluralName": "updateapks",
+        "displayName": "Update APK"
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "type": {
+            "type": "enumeration",
+            "enum": [
+                "url",
+                "file"
+            ],
+            "required": true
+        },
+        "locations": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "plugin::radio.location"
+        },
+        "file": {
+            "type": "media",
+            "multiple": false,
+            "allowedTypes": [
+                "images",
+                "files",
+                "videos",
+                "audios"
+            ]
+        },
+        "version": {
+            "type": "string"
+        }
+    }
+}

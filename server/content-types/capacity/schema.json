@@ -1,0 +1,26 @@
+{
+    "kind": "collectionType",
+    "collectionName": "capacities",
+    "info": {
+        "singularName": "capacity",
+        "pluralName": "capacities",
+        "displayName": "Capacity",
+        "description": ""
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "name": {
+            "type": "string",
+            "required": true,
+            "unique": true
+        },
+        "slug": {
+            "type": "string",
+            "required": true,
+            "unique": true
+        }
+    }
+}

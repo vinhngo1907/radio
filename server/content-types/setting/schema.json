@@ -1,0 +1,54 @@
+{
+    "kind": "singleType",
+    "collectionName": "settings",
+    "info": {
+        "singularName": "setting",
+        "pluralName": "settings",
+        "displayName": "Setting",
+        "description": ""
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "gg_api_key": {
+            "type": "text",
+            "required": true,
+            "unique": true
+        },
+        "vbee_app_id": {
+            "type": "text",
+            "required": true,
+            "unique": true
+        },
+        "level_location": {
+            "type": "integer",
+            "required": true
+        },
+        "priority_mode": {
+            "type": "enumeration",
+            "enum": [
+                "right-away-continue",
+                "right-away-skip"
+            ],
+            "required": true
+        },
+        "vbee_token": {
+            "type": "string",
+            "required": true,
+            "unique": true
+        },
+        "server_socket": {
+            "type": "string",
+            "required": true
+        },
+        "allow_create_exist_playlist": {
+            "type": "enumeration",
+            "enum": [
+                "allow",
+                "not_allow"
+            ]
+        }
+    }
+}

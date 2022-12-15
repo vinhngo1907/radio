@@ -1,0 +1,19 @@
+{
+    "kind": "singleType",
+    "collectionName": "convert_texts",
+    "info": {
+      "singularName": "converttext",
+      "pluralName": "converttexts",
+      "displayName": "Convert-text"
+    },
+    "options": {
+      "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+      "uid": {
+        "type": "uid"
+      }
+    }
+  }
+  

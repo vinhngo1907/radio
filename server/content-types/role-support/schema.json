@@ -1,0 +1,31 @@
+{
+    "kind": "collectionType",
+    "collectionName": "role_supports",
+    "info": {
+        "singularName": "rolesupport",
+        "pluralName": "rolesupports",
+        "displayName": "Role Support",
+        "description": ""
+    },
+    "options": {
+        "draftAndPublish": true
+    },
+    "pluginOptions": {},
+    "attributes": {
+        "name": {
+            "type": "string",
+            "required": true,
+            "unique": true
+        },
+        "slug": {
+            "type": "string",
+            "required": true,
+            "unique": true
+        },
+        "capacities": {
+            "type": "relation",
+            "relation": "oneToMany",
+            "target": "plugin::radio.capacity"
+        }
+    }
+}
