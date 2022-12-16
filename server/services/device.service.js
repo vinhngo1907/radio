@@ -4,7 +4,9 @@
 const { Strapi } = require("@strapi/strapi");
 const { checkPermission } = require("..//utils/checkPermission");
 const { createDeviceKeyHook } = require("../utils/hook");
-const locationSchema = require("../models/locations.model");
+// const locationSchema = require("../models/locations.model");
+const { Locations } = require("../entities/location.entity");
+const AppDataSource = require("../database");
 
 const {
     roleLocations,
@@ -50,7 +52,9 @@ module.exports=({strapi})=>({
                 { ...query }
             );
             // get locations
-            const locationsDevices = await locationSchema.find()
+            // const locationsDevices = await locationSchema.find()
+            const Entry = AppDataSource.getRepository(Locations);
+            const locationsDevices = await Entry.find()
             //
             const res = await roleLocationsData(ctx, strapi, response);
             const data = res.slice(page * limit, page * limit + limit);
@@ -108,7 +112,7 @@ module.exports=({strapi})=>({
         const allowCreate = await roleLocationsCreate(ctx, strapi);
 
         if (allowCreate != true) {
-            ctx.send({ message: "You don't allow create device at location" }, 403);
+            ctx.send({ message: "You don't allow create device at location", status: 401 }, 200);
             return;
         }
 
@@ -119,7 +123,7 @@ module.exports=({strapi})=>({
             process.env.CAPACITY_CREATE
         );
         if (!allow) {
-            ctx.send({ message: "You not allow create device" }, 403);
+            ctx.send({ message: "You not allow create device", status: 403 }, 200);
             return;
         }
 
@@ -134,7 +138,7 @@ module.exports=({strapi})=>({
 
         // check device
         if (checkDevice) {
-            ctx.send({ message: "This device is already exist" }, 400);
+            ctx.send({ message: "This device is already exist", status: 409 }, 200);
             return;
         }
 
@@ -169,7 +173,7 @@ module.exports=({strapi})=>({
             "plugin::radio.device"
         );
         if (allowRoleLocation != true) {
-            ctx.send({ message: "You don't allow update device at location" }, 403);
+            ctx.send({ message: "You don't allow update device at location", status: 403 }, 200);
             return;
         }
         // Check roles
@@ -179,7 +183,7 @@ module.exports=({strapi})=>({
             process.env.CAPACITY_UPDATE
         );
         if (!allow) {
-            ctx.send({ message: "You not allow update device" }, 403);
+            ctx.send({ message: "You not allow update device", status: 403 }, 200);
             return;
         }
         //check permission active
@@ -191,7 +195,7 @@ module.exports=({strapi})=>({
                 process.env.CAPACITY_ACTIVE
             );
             if (!allow) {
-                ctx.send({ message: "You not allow active device" }, 403);
+                ctx.send({ message: "You not allow active device", status: 403 }, 200);
                 return;
             }
         }
@@ -232,7 +236,7 @@ module.exports=({strapi})=>({
             "plugin::radio.device"
         );
         if (allowRoleLocation != true) {
-            ctx.send({ message: "You don't allow delete device at location" }, 403);
+            ctx.send({ message: "You don't allow delete device at location", status: 403 }, 200);
             return;
         }
         // Check permission
@@ -241,8 +245,9 @@ module.exports=({strapi})=>({
             strapi,
             process.env.CAPACITY_DELETE
         );
+        
         if (!allow) {
-            ctx.send({ message: "You not allow delete device" }, 403);
+            ctx.send({ message: "You not allow delete device", status: 403 }, 200);
             return;
         }
         //

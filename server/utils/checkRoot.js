@@ -9,7 +9,7 @@ const checkAccountRoot = async (user) => {
 		// 	process.env.SUPER_ADMIN_SECRET_KEY,
 		// 	user.root || ""
 		// );
-		const validRoot = await bcrypt.compare(process.env.SUPER_ADMIN_SECRET_KEY, user.root);
+		const validRoot = await bcrypt.compare(process.env.SUPER_ADMIN_SECRET_KEY, user.root || "");
 
 		return validRoot;
 	} catch (error) {

@@ -64,11 +64,11 @@ const getMinute = (time) => {
 
 const query = {
     filters: {
+        $not: {
+            publishedAt: null,
+        },
         status: 'complete',
         locations: [],
-        $not: {
-            publishedAt: null
-        }
     },
     populate: {
         locations: {
@@ -146,7 +146,7 @@ const getScheduleRepeatDateInMonth = (date, start, end, schedule) => {
 
 }
 
-function getFirstDayInWeek(month, day){
+function getFirstDayInWeek(month, day) {
     const d = new Date();
     d.setMonth(month);
     let found = false;
@@ -442,17 +442,20 @@ const getResults = async (timeBlockExist, locationUserCreating, setting, strapi)
     }
 }
 
-const getPlaylistSampleLocationFromDb = async (data, strapi) => {
+// const getPlaylistSampleLocationFromDb = async (data, strapi) => {
+const getPlaylistSampleLocationFromDb = async (data, strapi, params = null) => {
     const locations = data.locations
 
     query.filters.locations = locations
 
-    const playlistsQuery = await strapi.entityService.findMany("plugin::radio.playlist", query)
+    // const playlistsQuery = await strapi.entityService.findMany("plugin::radio.playlist", query)
+    const playlistsQuery = await strapi.entityService.findMany("plugin::radio.playlist", { ...query });
 
     const playlists = playlistsQuery.filter(item => {
         const a = []
         item.locations.forEach(elem => a.push(elem.id))
-        return JSON.stringify(locations) == JSON.stringify(a)
+        // return JSON.stringify(locations) == JSON.stringify(a)
+        return JSON.stringify(locations) == JSON.stringify(a) && item.id != params;
     })
 
     return playlists
@@ -579,5 +582,6 @@ const checkCalendarUser = async (data, user, strapi) => {
 }
 
 
-module.exports = { 
-    checkCalendarUser, getPlaylistSampleLocationFromDb, timeConverter, getTimeBlock, getTimeBlockExits, getTimeBlockExitsEveryDay, getScheduleRepeatDateInMonth, getTimeBlockExitsRepeatDateAndDay, getScheduleRepeatDayInWeek }
+module.exports = {
+    checkCalendarUser, getPlaylistSampleLocationFromDb, timeConverter, getTimeBlock, getTimeBlockExits, getTimeBlockExitsEveryDay, getScheduleRepeatDateInMonth, getTimeBlockExitsRepeatDateAndDay, getScheduleRepeatDayInWeek
+}

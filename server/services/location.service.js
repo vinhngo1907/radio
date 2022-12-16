@@ -23,13 +23,16 @@ const query = {
         location_parent: {
             fields: ["id", "name", "slug"],
         },
-        user_created:{
+        user_created: {
             fields: ["email", "username", "first_name", "last_name"]
         }
     },
+    sort: {
+        createdAt: 'DESC'
+    }
 }
 
-module.exports = ({strapi})=>({
+module.exports = ({ strapi }) => ({
     async find(ctx) {
         const deep = ctx.request.query.deep;
         const page = Number(ctx.request.query.page) - 1 || 0;
@@ -46,7 +49,7 @@ module.exports = ({strapi})=>({
                     const response = res.slice(page * limit, page * limit + limit);
                     return response;
                 } catch (error) {
-                    ctx.send({ message: "Not found location" }, 400);
+                    ctx.send({ message: "Not found location", status: 400 }, 200);
                     return;
                 }
             } else if (deep != -1) {
@@ -86,7 +89,7 @@ module.exports = ({strapi})=>({
     async create(ctx) {
         //data submit
         const bodyRequest = ctx.request.body.data;
-        
+
         const token = ctx.request.headers.authorization;
         const user = await jwt(token, strapi);
 
@@ -103,7 +106,7 @@ module.exports = ({strapi})=>({
             process.env.CAPACITY_CREATE_LOCATION
         );
         if (!allow) {
-            ctx.send({ message: "You not allow create location" }, 403);
+            ctx.send({ message: "You not allow create location", status: 403 }, 200);
             return;
         }
         //get all location
@@ -192,7 +195,7 @@ module.exports = ({strapi})=>({
                     }
                 } else {
                     if (response == undefined) {
-                        ctx.send({ message: "Somethings with wrong" }, 400);
+                        ctx.send({ message: "Somethings with wrong", status: 400 }, 200);
                         return;
                     }
                     const res = await strapi.entityService.create(
@@ -212,7 +215,7 @@ module.exports = ({strapi})=>({
                 }
             }
         }
-        ctx.send({ message }, status);
+        ctx.send({ message, status }, 200);
     },
     // update role
     async update(ctx) {

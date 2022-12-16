@@ -59,10 +59,14 @@ const createPlaylistHook = async (params, strapi, ctx) => {
             params,
             query
         );
-        if (playlist.status == "pending" || playlist.status == "active") {
+
+        if (playlist.status == "pending") {
             return;
         }
         // console.log(playlist);
+
+        await deletePlaylistHook(ctx, [playlist.id]);
+
         const devices = await strapi.entityService.findMany("plugin::radio.device", {
             populate: {
                 locations: true,
@@ -134,6 +138,7 @@ const createPlaylistHook = async (params, strapi, ctx) => {
 const deletePlaylistHook = async (ctx, playlistId) => {
     try {
         const token = ctx.request.headers.authorization;
+        console.log(token)
         // const id = ctx.request.params.id;
         const id = JSON.stringify(playlistId)
         const res = await axios.delete(

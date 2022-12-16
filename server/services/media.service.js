@@ -30,6 +30,9 @@ const query = {
             },
         },
     },
+    sort:{
+        createdAt: 'DESC'
+    }
 };
 
 module.exports = ({ strapi }) => ({
@@ -81,7 +84,7 @@ module.exports = ({ strapi }) => ({
             process.env.CAPACITY_CREATE
         );
         if (!allow) {
-            ctx.send({ message: "You not allow create media" }, 403);
+            ctx.send({ message: "You not allow create media", status: 403 }, 200);
             return;
         }
 
@@ -179,7 +182,7 @@ module.exports = ({ strapi }) => ({
             );
 
             if (allowLocation != true) {
-                throw new Error("You not allow update media at location");
+                ctx.send({ message: "You not allow update media at location", status: 403 }, 200);
             }
             // Check roles
             const allow = await checkPermission(
@@ -187,8 +190,9 @@ module.exports = ({ strapi }) => ({
                 strapi,
                 process.env.CAPACITY_UPDATE
             );
+
             if (!allow) {
-                throw new Error("You don't alllow update media");
+                ctx.send({ message: "You don't alllow update media", status: 403 }, 200);
             }
             //Check permission active
             const active = ctx.request.body.status;
@@ -199,7 +203,7 @@ module.exports = ({ strapi }) => ({
                     process.env.CAPACITY_ACTIVE
                 );
                 if (!allow) {
-                    ctx.send({ message: "You not allow active media" }, 403);
+                    ctx.send({ message: "You not allow active media", status: 403 }, 200);
                     return;
                 }
             }
@@ -234,7 +238,7 @@ module.exports = ({ strapi }) => ({
             locationMedia
         );
         if (allowLocation != true) {
-            ctx.send({ message: "You not allow delete media at location" }, 403);
+            ctx.send({ message: "You not allow delete media at location", status: 403 }, 200);
             return;
         }
         // Check roles
@@ -244,7 +248,7 @@ module.exports = ({ strapi }) => ({
             process.env.CAPACITY_DELETE
         );
         if (!allow) {
-            ctx.send({ message: "You don't allow delete media" }, 403);
+            ctx.send({ message: "You don't allow delete media", status: 403 }, 200);
             return;
         }
         try {
