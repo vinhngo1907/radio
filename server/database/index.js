@@ -5,7 +5,7 @@ const { Schedule } = require("../entities/schedule.entity");
 
 const AppDataSource = new DataSource({
     type: "postgres",
-    host: 'localhost',
+    host: process.env.HOST_SOCKET || 'localhost',
     port: parseInt(process.env.DB_PORT ?? '5433'),
     username: process.env.BD_USER ?? "yugabyte",
     password: process.env.DB_PASS ?? "yugabyte",

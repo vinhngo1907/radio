@@ -8,14 +8,14 @@ const Locations = new EntitySchema({
     columns: {
         id: {
             primary: true,
-            type: "int",
+            type: "uuid",
             generated: true,
         },
         deviceId: {
-            type: "text",
+            type: "character varying",
         },
-        lat: { type: "text" },
-        lng: { type: "text" }
+        lat: { type: "character varying" },
+        lng: { type: "character varying" }
     },
 });
 

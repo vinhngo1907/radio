@@ -36,11 +36,20 @@ const getDataPriority = async (data) => {
 
 
     media.forEach(item => {
-        const obj = {
-            url: process.env.BASE_URL + item.media.url,
-            size: Number((item.media.size * 1024).toFixed(0))
+        if (item.type == 'mp3') {
+            const obj = {
+                url: process.env.BASE_URL + item.media.url,
+                size: Number((item.media.size * 1024).toFixed(0))
+            }
+            listMedia.push(obj)
+        } else {
+            const obj = {
+                url: item.source,
+                size: 0
+            }
+            listMedia.push(obj)
         }
-        listMedia.push(obj)
+
     })
 
     device.filter(item => {
@@ -111,6 +120,7 @@ const checkPriority = async (data) => {
     return allow
 
 }
+
 
 
 module.exports = { checkPriority, getDataPriority }

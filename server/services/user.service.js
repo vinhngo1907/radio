@@ -31,7 +31,7 @@ module.exports = ({ strapi }) => ({
             const data = ctx.request.body;
             const { id } = ctx.request.query;
             // update avatar
-            if (ctx.request.files.avatar) {
+            if (ctx.request.files && ctx.request.files.avatar) {
                 const file = ctx.request.files.avatar;
                 const uploadService = strapi.plugins.upload.services.upload;
                 const resFile = await uploadService.upload({
@@ -119,6 +119,7 @@ module.exports = ({ strapi }) => ({
                 throw new Error("User not found");
             }
         } catch (error) {
+            console.log(error);
             return ctx.send({ message: error.message }, 400);
         }
     },

@@ -16,7 +16,7 @@
 // }
 
 function getSetting(strapi) {
-    const response = strapi.entityService.findMany("plugin::radio.setting", {
+    const response = strapi.entityService.findMany("api::setting.setting", {
         fields: ["allow_create_exist_playlist"]
     })
     return response
@@ -24,10 +24,11 @@ function getSetting(strapi) {
 
 
 function formatTimeByTimeZone(date) {
-    const d = new Date();
-    const timeZone = d.getTimezoneOffset();
+    // const d = new Date();
+    // const timeZone = d.getTimezoneOffset();
 
-    return date.getTime() + timeZone * 60 * 1000;
+    // return date.getTime() + timeZone * 60 * 1000;
+    return date.getTime()
 }
 
 const timeConverter = (date_start, time_start, type = 'no') => {
@@ -87,7 +88,6 @@ const query = {
 }
 
 const getScheduleRepeatDateInMonth = (date, start, end, schedule) => {
-    // const scheduleRepeat: { timesTampStart: number, timesTampEnd: number }[] = [];
     const scheduleRepeat = [];
 
     const repeat_start_hours_int = new Date(start * 1000).getUTCHours();
@@ -442,21 +442,21 @@ const getResults = async (timeBlockExist, locationUserCreating, setting, strapi)
     }
 }
 
-// const getPlaylistSampleLocationFromDb = async (data, strapi) => {
 const getPlaylistSampleLocationFromDb = async (data, strapi, params = null) => {
     const locations = data.locations
 
     query.filters.locations = locations
 
-    // const playlistsQuery = await strapi.entityService.findMany("plugin::radio.playlist", query)
-    const playlistsQuery = await strapi.entityService.findMany("plugin::radio.playlist", { ...query });
+    const playlistsQuery = await strapi.entityService.findMany("api::playlist.playlist", { ...query })
+
 
     const playlists = playlistsQuery.filter(item => {
         const a = []
         item.locations.forEach(elem => a.push(elem.id))
-        // return JSON.stringify(locations) == JSON.stringify(a)
-        return JSON.stringify(locations) == JSON.stringify(a) && item.id != params;
+        return JSON.stringify(locations) == JSON.stringify(a) && item.id != params
     })
+
+    console.log(">>>>>>>>", playlists)
 
     return playlists
 }
@@ -580,7 +580,6 @@ const checkCalendarUser = async (data, user, strapi) => {
     }
     return results
 }
-
 
 module.exports = {
     checkCalendarUser, getPlaylistSampleLocationFromDb, timeConverter, getTimeBlock, getTimeBlockExits, getTimeBlockExitsEveryDay, getScheduleRepeatDateInMonth, getTimeBlockExitsRepeatDateAndDay, getScheduleRepeatDayInWeek

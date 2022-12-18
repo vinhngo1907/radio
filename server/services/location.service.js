@@ -57,12 +57,7 @@ module.exports = ({ strapi }) => ({
                     const response = await strapi.entityService.findMany(
                         "plugin::radio.location",
                         {
-                            fields: ["id", "name", "slug"],
-                            populate: {
-                                location_parent: {
-                                    fields: ["id", "name", "slug"],
-                                },
-                            },
+                            ...query,
                             filters: {
                                 location_parent: {
                                     id: deep,
@@ -90,8 +85,7 @@ module.exports = ({ strapi }) => ({
         //data submit
         const bodyRequest = ctx.request.body.data;
 
-        const token = ctx.request.headers.authorization;
-        const user = await jwt(token, strapi);
+        const token = ctx.request.headers.authorization
 
         const data = bodyRequest.map((item) => {
             return {
@@ -125,6 +119,7 @@ module.exports = ({ strapi }) => ({
         let message;
         let status;
         let response;
+        const user = await jwt(token, strapi)
 
         for (let i = 0; i < data.length; i++) {
             if (i == 0) {
@@ -146,7 +141,6 @@ module.exports = ({ strapi }) => ({
                         {
                             data: {
                                 location_parent: [res.id],
-                                user_created: [user.id]
                             },
                         }
                     );
@@ -286,4 +280,36 @@ module.exports = ({ strapi }) => ({
         }
         ctx.send({ message }, status);
     },
+    // async delete(ctx) {
+    //   const { request } = ctx;
+    //   const params = request.params.id;
+    //   let allLocation;
+    //   // Check roles
+    //   const allow = await checkPermission(
+    //     ctx,
+    //     strapi,
+    //     process.env.CAPACITY_DELETE
+    //   );
+    //   if (!allow) return;
+    //   //
+    //   const res = await strapi.entityService.delete(
+    //     "plugin::radio.location",
+    //     params
+    //   );
+    //   do {
+    //     allLocation = await strapi.entityService.findMany(
+    //       "plugin::radio.location",
+    //       query
+    //     );
+    //     allLocation.forEach(async (item) => {
+    //       if (item.location_parent == null) {
+    //         await strapi.entityService.delete(
+    //           "plugin::radio.location",
+    //           item.id
+    //         );
+    //       }
+    //     });
+    //   } while (allLocation.some((item) => item.location_parent == null));
+    //   return res;
+    // },
 })

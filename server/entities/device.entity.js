@@ -8,14 +8,15 @@ const DeviceSockets = new EntitySchema({
     columns: {
         id: {
             primary: true,
-            type: "int",
+            type: "uuid",
             generated: true,
+
         },
         deviceId: {
-            type: "text",
+            type: "character varying",
         },
-        socketId: { type: 'text' },
-        deviceKey: { type: 'text' }
+        socketId: { type: 'character varying' },
+        deviceKey: { type: 'character varying' }
     },
 });
 

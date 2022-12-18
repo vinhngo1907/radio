@@ -4,24 +4,24 @@ const EntitySchema = typeorm.EntitySchema;
 
 const Schedule = new EntitySchema({
     name: "Schedule",
-    tableName: "schedules",
+    tableName: "schedule",
     columns: {
         id: {
             primary: true,
-            type: "int",
+            type: "uuid",
             generated: true,
         },
         deviceId: {
-            type: "text",
+            type: "character varying",
         },
         playlistId: {
-            type: "text",
+            type: "character varying",
         },
         action: {
-            type: "text"
+            type: "character varying"
         },
         playlists: {
-            type: "text"
+            type: "character varying"
         }
     },
 });

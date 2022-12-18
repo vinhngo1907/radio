@@ -35,7 +35,8 @@ const query = {
         "time_end",
         "type",
         "repeat",
-        "note"
+        "note",
+        "createdAt"
     ],
     filters: {
         $not: {
@@ -63,8 +64,11 @@ const query = {
             }
         },
         user_created: {
-            fields: ["username", 'first_name', 'last_name', 'email']
-        }
+            fields: ["id", "username", "first_name", "last_name", "phone_number"],
+            populate: {
+                locations: true,
+            },
+        },
     },
     sort: {
         createdAt: 'DESC'
@@ -119,7 +123,7 @@ module.exports = ({ strapi }) => (
             const allow = await checkPermission(
                 ctx,
                 strapi,
-                process.env.CAPACITY_CREATE
+                process.env.CAPACITY_CREATE_PLAYLIST
             );
             if (!allow) {
                 ctx.send({ message: "You don't allow create device", status: 403 }, 200);
@@ -134,7 +138,7 @@ module.exports = ({ strapi }) => (
             }
 
             if (resCalendar.status == 404) {
-                ctx.send({ message: resCalendar.message, status: 403 }, 200)
+                ctx.send({ message: resCalendar.message, status: 403 }, 200);
                 return
             }
             if (resCalendar.status == 409) {
@@ -218,6 +222,7 @@ module.exports = ({ strapi }) => (
             );
             //check update playlist have time exits
             const exist = await checkUpdatePlaylist(request.body, data, token, params);
+
             if (exist) {
                 ctx.send({ message: "Have are playlist exist in time", status: 409 }, 200);
                 return;
@@ -230,7 +235,6 @@ module.exports = ({ strapi }) => (
                     {
                         data: {
                             ...request.body,
-                            publishedAt: new Date()
                         },
                     }
                 );

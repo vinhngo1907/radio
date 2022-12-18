@@ -134,6 +134,7 @@ const roleLocationsDataMedia = async (ctx, strapi, data) => {
         const validRoot = await checkAccountRoot(user);
         if (validRoot) return data;
         //
+        //
         const locationsUser = user?.locations;
         const idLocationParent = locationsUser[locationsUser.length - 1].id;
         const dataRes = [];
@@ -160,16 +161,30 @@ const roleLocationFindPlaylist = async (ctx, strapi, data) => {
         if (validRoot) return data;
         //
         const locationsUser = user?.locations;
-        const idLocationParent = locationsUser[0].id;
-        const dataRes = [];
-        //   console.log(data);
-        data.forEach((item) => {
-            const locations = item?.locations || [];
-            if (idLocationParent == locations[0].id) {
-                dataRes.push(item);
-            }
-        });
-        return dataRes;
+
+        if (locationsUser.length == 1) {
+            const idLocationParent = locationsUser[0].id;
+            const dataRes = [];
+            data.forEach((item) => {
+                const locations = item?.locations || [];
+                if (idLocationParent == locations[0].id) {
+                    dataRes.push(item);
+                }
+            });
+            return dataRes;
+        } else {
+            const idLocationParent = locationsUser[locationsUser.length - 1].id;
+            const dataRes = [];
+            data.forEach((item) => {
+                const locations = item.locations || [];
+                locations.forEach((elem, index) => {
+                    if (idLocationParent == elem.id && locationsUser.length - 1 == index) {
+                        dataRes.push(item);
+                    }
+                });
+            });
+            return dataRes
+        }
     } catch (error) {
         return error;
     }

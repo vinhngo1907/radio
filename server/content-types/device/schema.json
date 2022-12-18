@@ -32,7 +32,7 @@
         "device_id": {
             "type": "string",
             "required": true,
-            "unique": true
+            "unique": false
         },
         "device_model": {
             "type": "string",
@@ -60,6 +60,6 @@
             "type": "relation",
             "relation": "oneToOne",
             "target": "plugin::radio.user"
-          }
+        }
     }
 }
