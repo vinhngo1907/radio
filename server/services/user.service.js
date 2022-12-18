@@ -25,13 +25,13 @@ const query = {
     },
 };
 
-module.exports = ({strapi}) =>({
+module.exports = ({ strapi }) => ({
     async update(ctx) {
         try {
             const data = ctx.request.body;
             const { id } = ctx.request.query;
             // update avatar
-            if (ctx.request.files.avatar) {
+            if (ctx.request.files && ctx.request.files.avatar) {
                 const file = ctx.request.files.avatar;
                 const uploadService = strapi.plugins.upload.services.upload;
                 const resFile = await uploadService.upload({
@@ -119,6 +119,7 @@ module.exports = ({strapi}) =>({
                 throw new Error("User not found");
             }
         } catch (error) {
+            console.log(error);
             return ctx.send({ message: error.message }, 400);
         }
     },
@@ -142,7 +143,7 @@ module.exports = ({strapi}) =>({
             strapi,
             process.env.CAPACITY_CREATE_USER
         );
-        if (!allow) return;
+        if (!allow) return ctx.send({ message: "You not allow create user", status: 403 }, 200);
 
         try {
             const { request } = ctx;
@@ -153,7 +154,7 @@ module.exports = ({strapi}) =>({
                 },
             });
             if (user) {
-                throw new Error("Username or email already exist")
+                return ctx.send({ message: "Username or email already exist", status: 409 }, 200)
             }
 
             const data = {
@@ -186,42 +187,42 @@ module.exports = ({strapi}) =>({
             return ctx.send({ message: error.message }, 400);
         }
     },
-    async login(ctx){
-         //   const provider = ctx.params.provider || "local";
-         const { identifier, password } = ctx.request.body;
-         try {
-             const user = await strapi.query('plugin::radio.user').findOne({
-                 where: {
-                     $or: [{ email: identifier.toLowerCase() }, { username: identifier.toLowerCase() }],
-                 },
-             });
- 
-             if (!user) {
-                 throw new Error("Invalid identifier or password");
-             }
-             if (user.confirmed !== true) {
-                 throw new Error("Your account email is not confirmed");
-             }
-             if (user.blocked === true) {
-                 throw new Error("Your account has been blocked by an administrator");
-             }
- 
-             const validPassword = await bcrypt.compare(password, user.password);
-             if (!validPassword) {
-                 throw new Error("Invalid identifier or password");
-             }
-             const token = jsonwebtoken.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.EXPIRED_TOKEN });
-             
-             delete user?.password;
- 
-             return ctx.send({
-                 // jwt: getService("jwt").issue({ id: user.id }),
-                 jwt: token,
-                 user: user,
-             });
-         } catch (error) {
-             ctx.send({ message: error.message }, 401);
-             return;
-         }
+    async login(ctx) {
+        //   const provider = ctx.params.provider || "local";
+        const { identifier, password } = ctx.request.body;
+        try {
+            const user = await strapi.query('plugin::radio.user').findOne({
+                where: {
+                    $or: [{ email: identifier.toLowerCase() }, { username: identifier.toLowerCase() }],
+                },
+            });
+
+            if (!user) {
+                throw new Error("Invalid identifier or password");
+            }
+            if (user.confirmed !== true) {
+                throw new Error("Your account email is not confirmed");
+            }
+            if (user.blocked === true) {
+                throw new Error("Your account has been blocked by an administrator");
+            }
+
+            const validPassword = await bcrypt.compare(password, user.password);
+            if (!validPassword) {
+                throw new Error("Invalid identifier or password");
+            }
+            const token = jsonwebtoken.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.EXPIRED_TOKEN });
+
+            delete user?.password;
+
+            return ctx.send({
+                // jwt: getService("jwt").issue({ id: user.id }),
+                jwt: token,
+                user: user,
+            });
+        } catch (error) {
+            ctx.send({ message: error.message }, 401);
+            return;
+        }
     }
 })

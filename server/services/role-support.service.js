@@ -1,6 +1,7 @@
 'use strict';
 
-const { checkPermission } = require('../utils/checkPermission');
+const { getToken, checkPermission } = require('../utils/checkPermission');
+const checkAccountRoot = require("../utils/checkRoot");
 
 const query = {
     fields: ["name", "slug"],
@@ -24,13 +25,14 @@ module.exports = ({ strapi }) => ({
     async create(ctx) {
         const data = ctx.request.body;
         // Check permission
-        const allow = await checkPermission(
-            ctx,
-            strapi,
-            process.env.CAPACITY_CREATE
-        );
-        if (!allow) return;
-
+        const user = await jwt(getToken(ctx), strapi);
+        
+        //Check super admin
+        const validRoot = await checkAccountRoot(user);
+        if (!validRoot) {
+            return ctx.send({ message: "You not allow create role", status: 403 }, 200)
+        };
+        //
         const response = await strapi.entityService.create(
             "plugin::radio.rolesupport",
             {

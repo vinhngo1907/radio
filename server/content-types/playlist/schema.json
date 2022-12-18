@@ -35,8 +35,7 @@
             "type": "enumeration",
             "enum": [
                 "mp3",
-                "online",
-                "text"
+                "online"
             ],
             "required": true
         },

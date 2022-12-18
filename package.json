@@ -18,7 +18,8 @@
     "jwt-decode": "^3.1.2",
     "mongoose": "^6.8.0",
     "pizzip": "^3.1.4",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "typeorm": "^0.3.11"
   },
   "author": {
     "name": "A Strapi developer"

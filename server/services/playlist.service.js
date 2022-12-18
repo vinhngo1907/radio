@@ -35,7 +35,8 @@ const query = {
         "time_end",
         "type",
         "repeat",
-        "note"
+        "note",
+        "createdAt"
     ],
     filters: {
         $not: {
@@ -63,9 +64,15 @@ const query = {
             }
         },
         user_created: {
-            fields: ["username", 'first_name', 'last_name', 'email']
-        }
+            fields: ["id", "username", "first_name", "last_name", "phone_number"],
+            populate: {
+                locations: true,
+            },
+        },
     },
+    sort: {
+        createdAt: 'DESC'
+    }
 };
 
 module.exports = ({ strapi }) => (
@@ -109,33 +116,33 @@ module.exports = ({ strapi }) => (
             //Check role location
             const allowLocation = await roleLocationsCreate(ctx, strapi);
             if (allowLocation != true) {
-                ctx.send({ message: "You not allow create playlist at location" }, 403);
+                ctx.send({ message: "You not allow create playlist at location", status: 403 }, 200);
                 return;
             }
             // Check roles
             const allow = await checkPermission(
                 ctx,
                 strapi,
-                process.env.CAPACITY_CREATE
+                process.env.CAPACITY_CREATE_PLAYLIST
             );
             if (!allow) {
-                ctx.send({ message: "You don't allow create device" }, 403);
+                ctx.send({ message: "You don't allow create device", status: 403 }, 200);
                 return;
             }
 
             const resCalendar = await checkCalendarUser(data, user, strapi)
 
             if (resCalendar.status == 400) {
-                ctx.send({ message: "Have are playlist in this time create" }, 400)
+                ctx.send({ message: "Have are playlist in this time create", status: 409 }, 200);
                 return
             }
 
             if (resCalendar.status == 404) {
-                ctx.send({ message: resCalendar.message }, 404)
+                ctx.send({ message: resCalendar.message, status: 403 }, 200);
                 return
             }
             if (resCalendar.status == 409) {
-                ctx.send({ message: resCalendar.message }, 404)
+                ctx.send({ message: resCalendar.message, status: 404 }, 200);
                 return
             }
             if (data.repeat == "no" || data.repeat == "every_day") {
@@ -159,7 +166,7 @@ module.exports = ({ strapi }) => (
                 const res = createPlaylist(strapi, data, repeat, resCalendar);
                 return res;
             } else {
-                ctx.send("Some error please try again", 400);
+                return ctx.send({ message: "Some error please try again", status: 400 }, 200);
             }
         },
 
@@ -175,7 +182,7 @@ module.exports = ({ strapi }) => (
                 "plugin::radio.playlist"
             );
             if (allowLocation != true) {
-                ctx.send({ message: "You not allow update playlist at location" }, 403);
+                ctx.send({ message: "You not allow update playlist at location", status: 403 }, 200);
                 return;
             }
             // Check roles
@@ -185,7 +192,7 @@ module.exports = ({ strapi }) => (
                 process.env.CAPACITY_UPDATE
             );
             if (!allow) {
-                ctx.send({ message: "You don't allow update playlist" }, 403);
+                ctx.send({ message: "You don't allow update playlist", status: 403 }, 200);
                 return;
             }
             //Check permission active
@@ -197,7 +204,7 @@ module.exports = ({ strapi }) => (
                     process.env.CAPACITY_ACTIVE
                 );
                 if (!allow) {
-                    ctx.send({ message: "You don't allow active playlist" }, 403);
+                    ctx.send({ message: "You don't allow active playlist", status: 403 }, 200);
                     return;
                 }
                 await deletePlaylistExits(params, ctx)
@@ -214,9 +221,10 @@ module.exports = ({ strapi }) => (
                 }
             );
             //check update playlist have time exits
-            const exist = await checkUpdatePlaylist(request.body, data, token)
+            const exist = await checkUpdatePlaylist(request.body, data, token, params);
+
             if (exist) {
-                ctx.send({ message: "Have are playlist exist in time" }, 409);
+                ctx.send({ message: "Have are playlist exist in time", status: 409 }, 200);
                 return;
             }
             //case 1
@@ -227,7 +235,6 @@ module.exports = ({ strapi }) => (
                     {
                         data: {
                             ...request.body,
-                            publishedAt: new Date()
                         },
                     }
                 );
@@ -247,7 +254,7 @@ module.exports = ({ strapi }) => (
                 const response = await createPlaylistHook(params, strapi, ctx);
                 return response;
             }
-            ctx.send({ message: "Field type repeat is requied, please try again" }, 400);
+            ctx.send({ message: "Field type repeat is requied, please try again", status: 400 }, 200);
         },
 
         async delete(ctx) {
@@ -260,7 +267,7 @@ module.exports = ({ strapi }) => (
                     "plugin::radio.playlist"
                 );
                 if (allowLocation != true) {
-                    ctx.send({ message: "You not allow delete playlist at location" }, 403);
+                    ctx.send({ message: "You not allow delete playlist at location", status: 403 }, 200);
                     return;
                 }
                 // Check permission
@@ -270,7 +277,7 @@ module.exports = ({ strapi }) => (
                     process.env.CAPACITY_DELETE
                 );
                 if (!allow) {
-                    ctx.send({ message: "You don't allow delete playlist" }, 403);
+                    ctx.send({ message: "You don't allow delete playlist", status: 403 }, 200);
                     return;
                 }
                 //
@@ -313,10 +320,9 @@ module.exports = ({ strapi }) => (
                 }
                 const allow = await checkPriority(data)
                 if (!allow) {
-                    throw new Error("Have playlist =require(country or district in this time")
+                    throw new Error("Have playlist from country or district in this time")
                 }
-                const response = await getDataPriority(data);
-                console.log(response);
+                const response = await getDataPriority(data)
                 return response
             } catch (error) {
                 ctx.send({ message: error.message }, 409)
