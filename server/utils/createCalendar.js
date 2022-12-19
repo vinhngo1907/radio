@@ -16,7 +16,7 @@
 // }
 
 function getSetting(strapi) {
-    const response = strapi.entityService.findMany("api::setting.setting", {
+    const response = strapi.entityService.findMany("plugin::radio.setting", {
         fields: ["allow_create_exist_playlist"]
     })
     return response
@@ -447,7 +447,7 @@ const getPlaylistSampleLocationFromDb = async (data, strapi, params = null) => {
 
     query.filters.locations = locations
 
-    const playlistsQuery = await strapi.entityService.findMany("api::playlist.playlist", { ...query })
+    const playlistsQuery = await strapi.entityService.findMany("plugin::radio.playlist", { ...query })
 
 
     const playlists = playlistsQuery.filter(item => {
