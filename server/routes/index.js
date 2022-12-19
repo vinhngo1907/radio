@@ -9,6 +9,7 @@ const apkRouter = require("./apk.routing");
 const settingRouter = require("./setting.routing");
 const textToSpeedCallbackRouter = require("./text-to-speed-callback.routing");
 const convertTextRouter = require("./convert-text.routing");
+const playlistRouter = require("./playlist.routing");
 const mediaRouter = require("./media.routing");
 
 module.exports = [
@@ -56,6 +57,9 @@ module.exports = [
 
     // convert text
     ...convertTextRouter,
+
+    //
+    ...playlistRouter,
 
     // media
     ...mediaRouter
