@@ -29,11 +29,4 @@ module.exports = {
             ctx.throw(500, err);
         }
     },
-    async login(ctx){
-        try {
-            return await strapi.plugin('radio').service("userService").login(ctx);
-        } catch (err) {
-            ctx.throw(500, err);
-        }
-    }
 }

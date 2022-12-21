@@ -11,6 +11,7 @@ const textToSpeedCallbackRouter = require("./text-to-speed-callback.routing");
 const convertTextRouter = require("./convert-text.routing");
 const playlistRouter = require("./playlist.routing");
 const mediaRouter = require("./media.routing");
+const authRouter = require("./auth.routing");
 
 module.exports = [
     // test route
@@ -30,6 +31,9 @@ module.exports = [
     },
     // user
     ...userRouter,
+
+    // auth
+    ...authRouter,
 
     // action password
     ...actionPasswordRouter,

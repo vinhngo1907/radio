@@ -13,6 +13,7 @@ const textToSpeechCallbackController = require('./text-to-speech-callback.contro
 const convertTextController = require('./convert-text.controller');
 const mediaController = require('./media.controller');
 const playlistController = require('./playlist.controller');
+const authController = require("./auth.controller");
 
 module.exports = {
   myController,
@@ -27,5 +28,6 @@ module.exports = {
   textToSpeechCallbackController,
   convertTextController,
   mediaController,
-  playlistController
+  playlistController,
+  authController
 };

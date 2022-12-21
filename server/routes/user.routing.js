@@ -3,15 +3,6 @@
 const auth = require("../middlewares/auth");
 
 module.exports =  [
-    {
-		method: 'PUT',
-		path: '/api/login',
-		handler: 'userController.login',
-		config: {
-			policies: [],
-			auth: false
-		},
-	},
 	{
 		method: 'PUT',
 		path: '/api/user-register',
