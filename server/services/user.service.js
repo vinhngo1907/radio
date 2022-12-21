@@ -3,8 +3,6 @@
 const { checkPermission, getToken } = require("../utils/checkPermission");
 const jwt = require("../utils/jwt");
 const jwt_decode = require("jwt-decode");
-const jsonwebtoken = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 
 const query = {
     fields: ["username", "email", "first_name", "last_name", "phone_number", "blocked", "root"],
@@ -187,42 +185,4 @@ module.exports = ({ strapi }) => ({
             return ctx.send({ message: error.message }, 400);
         }
     },
-    async login(ctx) {
-        //   const provider = ctx.params.provider || "local";
-        const { identifier, password } = ctx.request.body;
-        try {
-            const user = await strapi.query('plugin::radio.user').findOne({
-                where: {
-                    $or: [{ email: identifier.toLowerCase() }, { username: identifier.toLowerCase() }],
-                },
-            });
-
-            if (!user) {
-                throw new Error("Invalid identifier or password");
-            }
-            if (user.confirmed !== true) {
-                throw new Error("Your account email is not confirmed");
-            }
-            if (user.blocked === true) {
-                throw new Error("Your account has been blocked by an administrator");
-            }
-
-            const validPassword = await bcrypt.compare(password, user.password);
-            if (!validPassword) {
-                throw new Error("Invalid identifier or password");
-            }
-            const token = jsonwebtoken.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.EXPIRED_TOKEN });
-
-            delete user?.password;
-
-            return ctx.send({
-                // jwt: getService("jwt").issue({ id: user.id }),
-                jwt: token,
-                user: user,
-            });
-        } catch (error) {
-            ctx.send({ message: error.message }, 401);
-            return;
-        }
-    }
 })

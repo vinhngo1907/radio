@@ -13,10 +13,12 @@ const textToSpeechCallbackService = require('./text-to-speech-callback.service')
 const convertTextService = require('./convert-text.service');
 const mediaService = require('./media.service');
 const playlistService = require('./playlist.service');
+const authService = require("./auth.service");
 
 module.exports = {
   myService,
   userService,
+  authService,
   actionPasswordService,
   roleSupportService,
   capacitiesService,

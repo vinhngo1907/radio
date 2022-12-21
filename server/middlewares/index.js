@@ -2,5 +2,6 @@
 const auth = require('../middlewares/auth');
 
 module.exports = {
-    auth
+    auth,
+    cors: true,
 };
