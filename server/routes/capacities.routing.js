@@ -1,4 +1,5 @@
 const auth = require('../middlewares/auth');
+const { authMiddleware } = require("../middlewares");
 
 module.exports = [
     {
@@ -9,8 +10,9 @@ module.exports = [
             policies: [],
             auth: false,
             middlewares: [
+                authMiddleware,
                 (ctx, next) => {
-                    return auth(ctx, next)
+                    return next()
                 }
             ]
         },
@@ -23,8 +25,9 @@ module.exports = [
             policies: [],
             auth: false,
             middlewares: [
+                authMiddleware,
                 (ctx, next) => {
-                    return auth(ctx, next)
+                    return next()
                 }
             ]
         },
@@ -37,8 +40,9 @@ module.exports = [
             policies: [],
             auth: false,
             middlewares: [
+                authMiddleware,
                 (ctx, next) => {
-                    return auth(ctx, next)
+                    return next()
                 }
             ]
         },
@@ -51,8 +55,9 @@ module.exports = [
             policies: [],
             auth: false,
             middlewares: [
+                authMiddleware,
                 (ctx, next) => {
-                    return auth(ctx, next)
+                    return next()
                 }
             ]
         },
