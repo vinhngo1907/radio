@@ -9,7 +9,7 @@ const AppDataSource = new DataSource({
     port: parseInt(process.env.DB_PORT ?? '5433'),
     username: process.env.BD_USER ?? "yugabyte",
     password: process.env.DB_PASS ?? "yugabyte",
-    database: "postgres",
+    database: "socket",
     synchronize: true,
     entities: [
         DeviceSockets,

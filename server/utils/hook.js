@@ -61,7 +61,6 @@ const createPlaylistHook = async (params, strapi, ctx) => {
             params,
             query
         );
-
         if (playlist.status == "pending") {
             return;
         }
@@ -72,6 +71,11 @@ const createPlaylistHook = async (params, strapi, ctx) => {
             populate: {
                 locations: true,
             },
+            filters: {
+                $not: {
+                    publishedAt: null
+                }
+            }
         });
         //List media of device
         const listMedia = [];
@@ -97,18 +101,42 @@ const createPlaylistHook = async (params, strapi, ctx) => {
         playlist.locations.forEach((item) => {
             listLocationPlaylist.push(item.id);
         });
-        devices.forEach((item) => {
-            const listLocationDevice = [];
-            item.locations.forEach((elem) => {
-                listLocationDevice.push(elem.id);
+
+        if (playlist.all_location == true) {
+            devices.forEach((item) => {
+                const listLocationDepend = []
+                const listLocationDevice = [];
+                const length = listLocationPlaylist.length
+                for (let i = 0; i < length; i++) {
+                    if (item.locations[i]?.id) {
+                        listLocationDepend.push(item.locations[i].id)
+                    }
+                }
+                item.locations.forEach((elem) => {
+                    listLocationDevice.push(elem.id);
+                });
+                if (
+                    JSON.stringify(listLocationDepend) ==
+                    JSON.stringify(listLocationPlaylist) && listLocationDevice.length > length
+                ) {
+                    listDevicesId.push({ deviceId: item.device_id });
+                }
             });
-            if (
-                JSON.stringify(listLocationDevice) ==
-                JSON.stringify(listLocationPlaylist)
-            ) {
-                listDevicesId.push({ deviceId: item.device_id });
-            }
-        });
+        } else {
+            devices.forEach((item) => {
+                const listLocationDevice = [];
+                item.locations.forEach((elem) => {
+                    listLocationDevice.push(elem.id);
+                });
+                if (
+                    JSON.stringify(listLocationDevice) ==
+                    JSON.stringify(listLocationPlaylist)
+                ) {
+                    listDevicesId.push({ deviceId: item.device_id });
+                }
+            });
+        }
+
         const dataSubmit = {
             listDevice: listDevicesId,
             playlist: {
@@ -116,6 +144,8 @@ const createPlaylistHook = async (params, strapi, ctx) => {
                 listMedia: listMedia,
             },
         };
+
+        console.log("Data Submit =>>>>>>>>>", dataSubmit)
 
         const response = await axios.post(
             `${process.env.URL_BASE_SOCKET}/api/v1/schedule/send-create-schedule`,

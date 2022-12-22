@@ -449,6 +449,22 @@ const getPlaylistSampleLocationFromDb = async (data, strapi, params = null) => {
 
     const playlistsQuery = await strapi.entityService.findMany("plugin::radio.playlist", { ...query })
 
+    if (data.all_location == true) {
+        const playlists = playlistsQuery.filter(item => {
+            const length = locations.length
+            const a = []
+            for (let i = 0; i < length; i++) {
+                if (item.locations[i]?.id != undefined) {
+                    a.push(item.locations[i].id)
+                }
+            }
+            const b = []
+            item.locations.forEach(elem => b.push(elem.id))
+            return JSON.stringify(locations) == JSON.stringify(a) && item.id != params && b.length > locations.length
+        })
+        console.log(">>>>>>>>Playlits all locations", playlists)
+        return playlists
+    }
 
     const playlists = playlistsQuery.filter(item => {
         const a = []
@@ -456,7 +472,7 @@ const getPlaylistSampleLocationFromDb = async (data, strapi, params = null) => {
         return JSON.stringify(locations) == JSON.stringify(a) && item.id != params
     })
 
-    console.log(">>>>>>>>", playlists)
+    console.log(">>>>>>>>Playlits no all locations", playlists)
 
     return playlists
 }

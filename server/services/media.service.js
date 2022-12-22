@@ -87,7 +87,7 @@ module.exports = ({ strapi }) => ({
             ctx.send({ message: "You not allow create media", status: 403 }, 200);
             return;
         }
-
+        //
         const { request } = ctx;
         const dataMedia = request.body;
         const name = request.body.name;
@@ -160,7 +160,6 @@ module.exports = ({ strapi }) => ({
             });
             return response;
         } catch (error) {
-            console.log(error);
             return ctx.send({ message: error.message }, 400);
         }
     },
@@ -189,7 +188,7 @@ module.exports = ({ strapi }) => ({
             const allow = await checkPermission(
                 ctx,
                 strapi,
-                process.env.CAPACITY_UPDATE
+                process.env.CAPACITY_UPDATE_MEDIA
             );
 
             if (!allow) {
@@ -202,7 +201,7 @@ module.exports = ({ strapi }) => ({
                 const allow = await checkPermission(
                     ctx,
                     strapi,
-                    process.env.CAPACITY_ACTIVE
+                    process.env.CAPACITY_ACTIVE_MEDIA
                 );
                 if (!allow) {
                     ctx.send({ message: "You not allow active media", status: 403 }, 200);
@@ -250,7 +249,6 @@ module.exports = ({ strapi }) => ({
             );
             return response;
         } catch (error) {
-            console.log(error);
             return ctx.send({ message: error.message }, 400);
         }
     },
@@ -276,7 +274,7 @@ module.exports = ({ strapi }) => ({
         const allow = await checkPermission(
             ctx,
             strapi,
-            process.env.CAPACITY_DELETE
+            process.env.CAPACITY_DELETE_MEDIA
         );
         if (!allow) {
             ctx.send({ message: "You don't allow delete media", status: 403 }, 200);
@@ -301,7 +299,6 @@ module.exports = ({ strapi }) => ({
             );
             return response;
         } catch (error) {
-            console.log(error);
             return ctx.send({ message: error.message }, 400);
         }
     },

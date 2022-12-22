@@ -3,7 +3,7 @@
 const jwt = require("./jwt");
 const { getPlaylistSampleLocationFromDb, getTimeBlock, getTimeBlockExits } = require('./createCalendar');
 
-const getDataPriority = async (data) => {
+const getDataPriority = async (data, all_location) => {
     const device = await strapi.entityService.findMany("plugin::radio.device", {
         filters: {
             $not: {
@@ -52,13 +52,35 @@ const getDataPriority = async (data) => {
 
     })
 
-    device.filter(item => {
-        const locationDevice = []
-        item.locations.forEach(elem => locationDevice.push(elem.id))
-        if (JSON.stringify(locationDevice) == JSON.stringify(data.locations)) {
-            listDevice.push({ deviceId: item.device_id })
-        }
-    })
+    if (all_location == true) {
+        device.forEach(item => {
+            const listLocationDepend = []
+            const length = data.locations.length
+            for (let i = 0; i < length; i++) {
+                if (item.locations[i]?.id) {
+                    console.log(item.locations[i].id)
+                    listLocationDepend.push(item.locations[i].id)
+                }
+            }
+            console.log(listLocationDepend)
+            const locationDevice = []
+            item.locations.forEach(elem => locationDevice.push(elem.id))
+            if (JSON.stringify(listLocationDepend) == JSON.stringify(data.locations) && locationDevice.length > length) {
+                listDevice.push({ deviceId: item.device_id })
+            }
+        })
+
+    } else {
+        device.filter(item => {
+            const locationDevice = []
+            item.locations.forEach(elem => locationDevice.push(elem.id))
+            if (JSON.stringify(locationDevice) == JSON.stringify(data.locations)) {
+                listDevice.push({ deviceId: item.device_id })
+            }
+        })
+    }
+
+
 
     const result = {
         playlistId: Math.floor(Math.random() * 50) + 1,
@@ -120,7 +142,6 @@ const checkPriority = async (data) => {
     return allow
 
 }
-
 
 
 module.exports = { checkPriority, getDataPriority }

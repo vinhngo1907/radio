@@ -9,8 +9,7 @@ const DeviceSockets = new EntitySchema({
         id: {
             primary: true,
             type: "uuid",
-            generated: true,
-
+            generated: "uuid"
         },
         deviceId: {
             type: "character varying",
