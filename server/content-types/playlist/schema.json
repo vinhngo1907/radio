@@ -87,6 +87,9 @@
             "type": "relation",
             "relation": "oneToMany",
             "target": "plugin::radio.playlist"
+        },
+        "all_location": {
+            "type": "boolean"
         }
     }
 }

@@ -1,6 +1,6 @@
 'use strict';
 
-const jsonwebtoken = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 module.exports = ({ strapi }) => ({
@@ -28,24 +28,26 @@ module.exports = ({ strapi }) => ({
             if (!validPassword) {
                 throw new Error("Invalid identifier or password");
             }
-            const token = jsonwebtoken.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.EXPIRED_TOKEN });
+            const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.EXPIRED_TOKEN });
 
             delete user?.password;
 
-            const refreshToken = jsonwebtoken.sign({ id: user.id }, process.env.JWT_SECRET_REFRESH_TOKEN, { expiresIn: process.env.EXPIRED_REFRESH_TOKEN });
+            const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET_REFRESH_TOKEN, { expiresIn: process.env.EXPIRED_REFRESH_TOKEN })
 
-            ctx.cookies.set('refreshToken', refreshToken, {
-                httpOnly: true,
-                path: "/radio/api/token",
-                maxAge: 1 * 24 * 60 * 60 * 1000,
-                secure: process.env.NODE_ENV === "production" ? true : false,
-            });
+            const endcode = jwt.sign({ refreshToken }, process.env.JWT_SECRET_ENDCODE, { expiresIn: process.env.EXPIRED_REFRESH_TOKEN })
+
+            // ctx.cookies.set('refreshToken', refreshToken, {
+            //     httpOnly: true,
+            //     path: "/radio/api/token",
+            //     maxAge: 1 * 24 * 60 * 60 * 1000,
+            //     secure: process.env.NODE_ENV === "production" ? true : false,
+            // });
 
             return ctx.send({
                 // jwt: getService("jwt").issue({ id: user.id }),
                 jwt: token,
+                refreshToken: endcode,
                 user: user,
-                // rf_token: refreshToken
             });
         } catch (error) {
             console.log(error);
@@ -55,49 +57,66 @@ module.exports = ({ strapi }) => ({
     },
     async refreshToken(ctx) {
         try {
-            // console.log(ctx.request.headers.cookie);
-            const cookies = ctx.request.headers.cookie.split(";");
-            const rf_token = cookies.find((item)=>item.startsWith("refreshToken"));
-            // console.log(rf_token);
-            if (!rf_token) {
+            const refreshToken = ctx.request.headers.jwt
+            if (refreshToken) {
+                const decode = jwt.verify(refreshToken, process.env.JWT_SECRET_ENDCODE)
+                if (!decode) {
+                    return ctx.send({ message: "Please login now", status: 401 }, 200);
+                }
+                const token = jwt.verify(decode.refreshToken, process.env.JWT_SECRET_REFRESH_TOKEN)
+                if (token) {
+                    return ctx.send({
+                        // jwt: getService("jwt").issue({ id: token.id }),
+                        jwt: jwt.sign({ id: token.id }, process.env.JWT_SECRET, { expiresIn: process.env.EXPIRED_TOKEN })
+                    });
+                }
+            } else {
                 return ctx.send({ message: "Please login", status: 401 }, 200);
             }
-            const rf_token_value = rf_token && rf_token.split("=")[1];
-            const decoded = jsonwebtoken.verify(rf_token_value, process.env.JWT_SECRET_REFRESH_TOKEN);
-            if (!decoded) {
-                return ctx.send({ message: "Please login now", status: 401 }, 200);
-            }
 
-            const userId = decoded.id;
-            const user = await strapi.entityService.findOne(
-                "plugin::radio.user",
-                userId, {
-                fields: ["id", "username", "email", "first_name", "last_name"],
-                populate: {
-                    locations: {
-                        fields: ["id", "name"],
-                    },
-                    avatar: {
-                    },
-                    role_support: {
-                        fields: ["id", "name"],
-                        populate: {
-                            capacities: {
-                                fields: ["id", "name"],
-                            },
-                        },
-                    },
-                }
-            });
-            if (!user) {
-                return ctx.send({ message: "Unauthorized, please login now", status: 401 }, 200);
-            }
+            // console.log(ctx.request.headers.cookie);
+            // const cookies = ctx.request.headers.cookie.split(";");
+            // const rf_token = cookies.find((item) => item.startsWith("refreshToken"));
+            // if (!rf_token) {
+            //     return ctx.send({ message: "Please login", status: 401 }, 200);
+            // }
 
-            const access_token = jsonwebtoken.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.EXPIRED_TOKEN });
-            return ctx.send({
-                jwt: access_token,
-                user: user
-            });
+            // const rf_token_value = rf_token && rf_token.split("=")[1];
+            // const decoded = jwt.verify(rf_token_value, process.env.JWT_SECRET_REFRESH_TOKEN);
+            // if (!decoded) {
+            //     return ctx.send({ message: "Please login now", status: 401 }, 200);
+            // }
+
+            // const userId = decoded.id;
+            // const user = await strapi.entityService.findOne(
+            //     "plugin::radio.user",
+            //     userId, {
+            //     fields: ["id", "username", "email", "first_name", "last_name"],
+            //     populate: {
+            //         locations: {
+            //             fields: ["id", "name"],
+            //         },
+            //         avatar: {
+            //         },
+            //         role_support: {
+            //             fields: ["id", "name"],
+            //             populate: {
+            //                 capacities: {
+            //                     fields: ["id", "name"],
+            //                 },
+            //             },
+            //         },
+            //     }
+            // });
+            // if (!user) {
+            //     return ctx.send({ message: "Unauthorized, please login now", status: 401 }, 200);
+            // }
+
+            // const access_token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: process.env.EXPIRED_TOKEN });
+            // return ctx.send({
+            //     jwt: access_token,
+            //     user: user
+            // });
         } catch (error) {
             console.log(error);
             return ctx.send({ message: error.message }, 400);

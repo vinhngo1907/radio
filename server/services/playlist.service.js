@@ -132,28 +132,28 @@ module.exports = ({ strapi }) => (
 
             const resCalendar = await checkCalendarUser(data, user, strapi)
 
+            // return
+
             if (resCalendar.status == 400) {
-                ctx.send({ message: "Have are playlist in this time create", status: 409 }, 200);
+                ctx.send({ message: "Have are playlist in this time create", status: 409 }, 200)
                 return
             }
 
             if (resCalendar.status == 404) {
-                ctx.send({ message: resCalendar.message, status: 403 }, 200);
+                ctx.send({ message: resCalendar.message, status: 403 }, 200)
                 return
             }
             if (resCalendar.status == 409) {
-                ctx.send({ message: resCalendar.message, status: 404 }, 200);
+                ctx.send({ message: resCalendar.message, status: 404 }, 200)
                 return
             }
             if (data.repeat == "no" || data.repeat == "every_day") {
-                const res = await strapi.entityService.create(
-                    "plugin::radio.playlist", {
+                const res = await strapi.service("plugin::radio.playlist").create({
                     data: {
                         ...data,
                         status: "pending",
                         playlists_exist: resCalendar.resId,
-                        note: resCalendar.message,
-                        publishedAt: new Date()
+                        note: resCalendar.message
                     },
                 });
                 return res;
@@ -189,7 +189,7 @@ module.exports = ({ strapi }) => (
             const allow = await checkPermission(
                 ctx,
                 strapi,
-                process.env.CAPACITY_UPDATE
+                process.env.CAPACITY_UPDATE_PLAYLIST
             );
             if (!allow) {
                 ctx.send({ message: "You don't allow update playlist", status: 403 }, 200);
@@ -201,13 +201,13 @@ module.exports = ({ strapi }) => (
                 const allow = await checkPermission(
                     ctx,
                     strapi,
-                    process.env.CAPACITY_ACTIVE
+                    process.env.CAPACITY_ACTIVE_PLAYLIST
                 );
                 if (!allow) {
                     ctx.send({ message: "You don't allow active playlist", status: 403 }, 200);
                     return;
                 }
-                await deletePlaylistExits(params, ctx)
+                const deletePlaylist = await deletePlaylistExits(params, ctx)
             }
             //
             const data = await strapi.entityService.findOne(
@@ -221,7 +221,7 @@ module.exports = ({ strapi }) => (
                 }
             );
             //check update playlist have time exits
-            const exist = await checkUpdatePlaylist(request.body, data, token, params);
+            const exist = await checkUpdatePlaylist(request.body, data, token, params)
 
             if (exist) {
                 ctx.send({ message: "Have are playlist exist in time", status: 409 }, 200);
@@ -254,9 +254,11 @@ module.exports = ({ strapi }) => (
                 const response = await createPlaylistHook(params, strapi, ctx);
                 return response;
             }
-            ctx.send({ message: "Field type repeat is requied, please try again", status: 400 }, 200);
+            ctx.send(
+                { message: "Field type repeat is requied, please try again", status: 400 },
+                200
+            );
         },
-
         async delete(ctx) {
             try {
                 const params = ctx.request.params.id;
@@ -274,7 +276,7 @@ module.exports = ({ strapi }) => (
                 const allow = await checkPermission(
                     ctx,
                     strapi,
-                    process.env.CAPACITY_DELETE
+                    process.env.CAPACITY_DELETE_PLAYLIST
                 );
                 if (!allow) {
                     ctx.send({ message: "You don't allow delete playlist", status: 403 }, 200);
@@ -302,13 +304,12 @@ module.exports = ({ strapi }) => (
 
         async priority(ctx) {
             try {
-                const { locations, media } = ctx.request.body
+                const { locations, media, all_location } = ctx.request.body
                 const token = ctx.request.headers.authorization
                 const options = {
                     locale: "Asia_Ho_Chi_Minh"
                 }
-                const a = "a.v.b.f.g"
-                console.log(a)
+
                 const timesTampStart = Number(new Date().getTime().toLocaleString("vi-VN", options).split(".").join(""))
                 const timesTampEnd = Number(new Date().getTime().toLocaleString("vi-VN", options).split(".").join("")) + 30 * 60 * 1000
                 const data = {
@@ -322,7 +323,7 @@ module.exports = ({ strapi }) => (
                 if (!allow) {
                     throw new Error("Have playlist from country or district in this time")
                 }
-                const response = await getDataPriority(data)
+                const response = await getDataPriority(data, all_location)
                 return response
             } catch (error) {
                 ctx.send({ message: error.message }, 409)
