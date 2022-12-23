@@ -12,5 +12,12 @@ module.exports = {
         }catch(error){
             ctx.throw(500, error);
         }
+    },
+    async update(ctx){
+        try{
+            return await strapi.plugin("radio").service("apkService").update(ctx);
+        }catch(error){
+            ctx.throw(500, error);
+        }
     }
 }

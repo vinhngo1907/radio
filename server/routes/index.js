@@ -1,4 +1,3 @@
-const auth = require("../middlewares/auth");
 const userRouter = require("./user.routing");
 const actionPasswordRouter = require("./action-password.routing");
 const roleSupportRouter = require("./role-support.routing");
@@ -12,6 +11,7 @@ const convertTextRouter = require("./convert-text.routing");
 const playlistRouter = require("./playlist.routing");
 const mediaRouter = require("./media.routing");
 const authRouter = require("./auth.routing");
+const { authMiddleware } = require("../middlewares");
 
 module.exports = [
     // test route
@@ -23,8 +23,9 @@ module.exports = [
             policies: [],
             auth: false,
             middlewares: [
+                authMiddleware,
                 (ctx, next) => {
-                    return auth(ctx, next)
+                    return next();
                 }
             ]
         },

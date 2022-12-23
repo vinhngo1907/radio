@@ -2,6 +2,7 @@
 
 const { getToken, checkPermission } = require('../utils/checkPermission');
 const checkAccountRoot = require("../utils/checkRoot");
+const jwt = require('../utils/jwt');
 
 const query = {
     fields: ["name", "slug"],
@@ -29,6 +30,7 @@ module.exports = ({ strapi }) => ({
         
         //Check super admin
         const validRoot = await checkAccountRoot(user);
+        // const root = checkAccountRoot()
         if (!validRoot) {
             return ctx.send({ message: "You not allow create role", status: 403 }, 200)
         };
@@ -51,7 +53,7 @@ module.exports = ({ strapi }) => ({
         const allow = await checkPermission(
             ctx,
             strapi,
-            process.env.CAPACITY_UPDATE
+            process.env.CAPACITY_UPDATE_ROLE
         );
         if (!allow) return;
 
@@ -72,7 +74,7 @@ module.exports = ({ strapi }) => ({
         const allow = await checkPermission(
             ctx,
             strapi,
-            process.env.CAPACITY_DELETE
+            process.env.CAPACITY_DELETE_ROLE
         );
         if (!allow) return;
 

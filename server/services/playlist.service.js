@@ -148,7 +148,8 @@ module.exports = ({ strapi }) => (
                 return
             }
             if (data.repeat == "no" || data.repeat == "every_day") {
-                const res = await strapi.service("plugin::radio.playlist").create({
+                const res = await strapi.entityService.create(
+                    "plugin::radio.playlist", {
                     data: {
                         ...data,
                         status: "pending",

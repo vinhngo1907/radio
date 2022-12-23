@@ -190,7 +190,7 @@ module.exports = ({ strapi }) => ({
         const allow = await checkPermission(
             ctx,
             strapi,
-            process.env.CAPACITY_UPDATE
+            process.env.CAPACITY_UPDATE_DEVICE
         );
         if (!allow) {
             ctx.send({ message: "You not allow update device", status: 403 }, 200);
@@ -260,7 +260,7 @@ module.exports = ({ strapi }) => ({
         const allow = await checkPermission(
             ctx,
             strapi,
-            process.env.CAPACITY_DELETE
+            process.env.CAPACITY_DELETE_DEVICE
         );
 
         if (!allow) {
