@@ -31,5 +31,20 @@ module.exports = [
 				}
 			]
 		}
+	},
+	{
+		method: "PUT",
+		path: '/api/apks',
+		handler: 'apkController.update',
+		config: {
+			policies: [],
+			auth: false,
+			middlewares: [
+				authMiddleware,
+				(ctx, next) => {
+					return next()
+				}
+			]
+		}
 	}
 ]
