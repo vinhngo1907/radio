@@ -126,7 +126,7 @@ module.exports = ({ strapi }) => (
                 process.env.CAPACITY_CREATE_PLAYLIST
             );
             if (!allow) {
-                ctx.send({ message: "You don't allow create device", status: 403 }, 200);
+                ctx.send({ message: "You don't allow create playlist", status: 403 }, 200);
                 return;
             }
 
@@ -186,79 +186,92 @@ module.exports = ({ strapi }) => (
                 ctx.send({ message: "You not allow update playlist at location", status: 403 }, 200);
                 return;
             }
-            // Check roles
-            const allow = await checkPermission(
-                ctx,
-                strapi,
-                process.env.CAPACITY_UPDATE_PLAYLIST
-            );
-            if (!allow) {
-                ctx.send({ message: "You don't allow update playlist", status: 403 }, 200);
-                return;
-            }
+
             //Check permission active
             const active = ctx.request.body.status;
             if (active) {
-                const allow = await checkPermission(
+                const allowActive = await checkPermission(
                     ctx,
                     strapi,
                     process.env.CAPACITY_ACTIVE_PLAYLIST
                 );
-                if (!allow) {
+                if (!allowActive) {
                     ctx.send({ message: "You don't allow active playlist", status: 403 }, 200);
                     return;
+                } else {
+                    const deletePlaylist = await deletePlaylistExits(params, ctx)
+                    const res = await strapi.entityService.update(
+                        "plugin::radio.playlist",
+                        params,
+                        {
+                            data: {
+                                status: 'complete'
+                            },
+                        }
+                    );
+                    const response = await createPlaylistHook(params, strapi, ctx);
+                    return response
                 }
-                const deletePlaylist = await deletePlaylistExits(params, ctx)
-            }
-            //
-            const data = await strapi.entityService.findOne(
-                "plugin::radio.playlist",
-                params,
-                {
-                    populate: {
-                        repeat_schedule: true,
-                        locations: true
-                    },
-                }
-            );
-            //check update playlist have time exits
-            const exist = await checkUpdatePlaylist(request.body, data, token, params)
+            } else {
 
-            if (exist) {
-                ctx.send({ message: "Have are playlist exist in time", status: 409 }, 200);
-                return;
-            }
-            //case 1
-            if (!request.body.repeat && !request.body.repeat_schedule) {
-                const res = await strapi.entityService.update(
+                //
+                const data = await strapi.entityService.findOne(
                     "plugin::radio.playlist",
                     params,
                     {
-                        data: {
-                            ...request.body,
+                        populate: {
+                            repeat_schedule: true,
+                            locations: true
                         },
                     }
                 );
-                const response = await createPlaylistHook(params, strapi, ctx);
-                return response;
-            }
-            //case 2
-            if (request.body.repeat) {
-                const res = await updateHaveRepeat(
-                    request,
-                    data,
-                    request.body,
+
+                // Check roles update
+                const allowUpdate = await checkPermission(
+                    ctx,
                     strapi,
-                    params
+                    process.env.CAPACITY_UPDATE_PLAYLIST
                 );
-                console.log(res)
-                const response = await createPlaylistHook(params, strapi, ctx);
-                return response;
+                if (!allowUpdate) {
+                    ctx.send({ message: "You don't allow update playlist", status: 403 }, 200);
+                    return;
+                }
+                //check update playlist have time exits
+                const exist = await checkUpdatePlaylist(request.body, data, token, params)
+
+                if (exist) {
+                    ctx.send({ message: "Have are playlist exist in time", status: 409 }, 200);
+                    return;
+                }
+                //case 1
+                if (!request.body.repeat && !request.body.repeat_schedule) {
+                    const res = await strapi.entityService.update(
+                        "plugin::radio.playlist",
+                        params,
+                        {
+                            data: {
+                                ...request.body,
+                            },
+                        }
+                    );
+                    const response = await createPlaylistHook(params, strapi, ctx);
+                    return response;
+                }
+                //case 2
+                if (request.body.repeat) {
+                    const res = await updateHaveRepeat(
+                        request,
+                        data,
+                        request.body,
+                        strapi,
+                        params
+                    );
+                    console.log(res)
+                    const response = await createPlaylistHook(params, strapi, ctx);
+                    return response;
+                }
+                ctx.send({ message: "Field type repeat is requied, please try again", status: 400 }, 200);
             }
-            ctx.send(
-                { message: "Field type repeat is requied, please try again", status: 400 },
-                200
-            );
         },
         async delete(ctx) {
             try {
