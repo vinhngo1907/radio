@@ -184,70 +184,83 @@ module.exports = ({ strapi }) => ({
                 ctx.send({ message: "You not allow update media at location", status: 403 }, 200);
                 return;
             }
-            // Check roles
-            const allow = await checkPermission(
-                ctx,
-                strapi,
-                process.env.CAPACITY_UPDATE_MEDIA
-            );
-
-            if (!allow) {
-                ctx.send({ message: "You don't alllow update media", status: 403 }, 200);
-                return;
-            }
             //Check permission active
             const active = ctx.request.body.status;
             if (active) {
-                const allow = await checkPermission(
+                const allowActive = await checkPermission(
                     ctx,
                     strapi,
                     process.env.CAPACITY_ACTIVE_MEDIA
                 );
-                if (!allow) {
+                if (!allowActive) {
                     ctx.send({ message: "You not allow active media", status: 403 }, 200);
                     return;
+                } else {
+                    const response = await strapi.entityService.update(
+                        "plugin::radio.media",
+                        params,
+                        {
+                            data: {
+                                status: 'complete'
+                            },
+                        }
+                    );
+                    return response;
+                }
+            } else {
+                // Check roles update
+                const allowUpdate = await checkPermission(
+                    ctx,
+                    strapi,
+                    process.env.CAPACITY_UPDATE_MEDIA
+                );
+                if (!allowUpdate) {
+                    ctx.send({ message: "You don't alllow update media", status: 403 }, 200);
+                    return;
+                } else {
+                    const file = ctx.request.files
+
+                    if (file.files) {
+                        const uploadService = strapi.plugins.upload.services.upload;
+                        const name = ctx.request.body.name;
+                        const data = {
+                            fileInfo: { name },
+                        };
+                        const resFile = await uploadService.upload({
+                            data,
+                            files: {
+                                name,
+                                buffer: true,
+                                path: file.files.path,
+                                type: file.files.type,
+                                size: file.files.size,
+                            },
+                        });
+                        const response = await strapi.entityService.update(
+                            "plugin::radio.media",
+                            params,
+                            {
+                                data: {
+                                    ...ctx.request.body,
+                                    media: [resFile[0].id],
+                                },
+                            }
+                        );
+                        return response;
+                    }
+
+                    const response = await strapi.entityService.update(
+                        "plugin::radio.media",
+                        params,
+                        {
+                            data: {
+                                ...ctx.request.body,
+                            },
+                        }
+                    );
+                    return response;
                 }
             }
-
-            // if (ctx.request.files) {
-            //   const file = ctx.request.files;
-            //   const data = {
-            //     fileInfo: { name },
-            //   };
-            //   const uploadService = strapi.plugins.upload.services.upload;
-            //   const resFile = await uploadService.upload({
-            //     data,
-            //     files: {
-            //       name,
-            //       buffer: true,
-            //       path: file.files.path,
-            //       type: file.files.type,
-            //       size: file.files.size,
-            //     },
-            //   });
-            //   const response = await strapi.entityService.update(
-            //     "plugin::radio.media",
-            //     params,
-            //     {
-            //       data: {
-            //         ...ctx.request.body,
-            //         media: [resFile[0].id],
-            //       },
-            //     }
-            //   );
-            //   return response;
-            // }
-            //
-            const response = await strapi.entityService.update(
-                "plugin::radio.media",
-                params,
-                {
-                    data: {
-                        ...ctx.request.body,
-                    },
-                }
-            );
-            return response;
         } catch (error) {
             return ctx.send({ message: error.message }, 400);
         }

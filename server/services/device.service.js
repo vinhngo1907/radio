@@ -52,7 +52,6 @@ module.exports = ({ strapi }) => ({
                 { ...query }
             );
             // get locations
-            // const locationsDevices = await locationSchema.find()
             const Entry = AppDataSource.getRepository(Locations);
             const locationsDevices = await Entry.find()
 
@@ -78,7 +77,7 @@ module.exports = ({ strapi }) => ({
             return newDataHaveLocations;
         } catch (error) {
             console.log(error);
-            return ctx.send({ message: error.message }, 400);
+            ctx.send({ message: error.message }, 400);
         }
     },
     async findOne(ctx) {
@@ -132,7 +131,6 @@ module.exports = ({ strapi }) => ({
             ctx.send({ message: "You not allow create device", status: 403 }, 200);
             return;
         }
-
         //
         try {
             const user = await jwt(token, strapi);
@@ -148,7 +146,7 @@ module.exports = ({ strapi }) => ({
                 }
             })
 
-            console.log(device);
+            console.log(device)
 
             if (device) {
                 return ctx.send({ message: "Device id already exists", status: 409 }, 200)
@@ -160,7 +158,6 @@ module.exports = ({ strapi }) => ({
                     data: {
                         ...data,
                         status: "pending",
-                        publishedAt: new Date(),
                         user_created: [user.id]
                         // roles,
                     },
@@ -174,7 +171,6 @@ module.exports = ({ strapi }) => ({
     async update(ctx) {
         const { request, response } = ctx;
         const params = request.params.id;
-        // const roles = request.body.roles;
         //Check role locations
         const allowRoleLocation = await roleLocations(
             ctx,
@@ -186,61 +182,70 @@ module.exports = ({ strapi }) => ({
             ctx.send({ message: "You don't allow update device at location", status: 403 }, 200);
             return;
         }
-        // Check roles
-        const allow = await checkPermission(
-            ctx,
-            strapi,
-            process.env.CAPACITY_UPDATE_DEVICE
-        );
-        if (!allow) {
-            ctx.send({ message: "You not allow update device", status: 403 }, 200);
-            return;
-        }
         //check permission active
         const active = request.body.status;
+
         if (active) {
-            const allow = await checkPermission(
+            const allowActive = await checkPermission(
                 ctx,
                 strapi,
-                process.env.CAPACITY_ACTIVE
+                process.env.CAPACITY_ACTIVE_DEVICE
             );
-            if (!allow) {
+            if (!allowActive) {
                 ctx.send({ message: "You not allow active device", status: 403 }, 200);
                 return;
-            }
-        }
-        //
-        // if (roles) {
-        //   roles.forEach((item, index) => {
-        //     request.body.roles[index].__component = "permission.permission";
-        //     request.body.roles[index].capacity = item.capacity;
-        //     request.body.roles[index].user_manager = item.user_manager;
-        //   });
-        // }
-        try {
-            const resUpdate = await strapi.entityService.update(
-                "plugin::radio.device",
-                params,
-                {
-                    data: {
-                        ...request.body,
-                    },
-                }
-            );
-            const res = await createDeviceKeyHook(params, strapi, ctx);
-            if (res.status == 200) {
-                return resUpdate;
             } else {
-                await strapi.entityService.update("plugin::radio.device", params, {
-                    data: {
-                        status: "pending",
-                    },
-                });
-                throw new Error(res.message);
+                try {
+                    const resUpdate = await strapi.entityService.update(
+                        "plugin::radio.device",
+                        params,
+                        {
+                            data: {
+                                status: active
+                            },
+                        }
+                    );
+                    const res = await createDeviceKeyHook(params, strapi, ctx);
+                    if (res.status == 200) {
+                        return resUpdate;
+                    } else {
+                        await strapi.entityService.update("plugin::radio.device", params, {
+                            data: {
+                                status: "pending",
+                            },
+                        });
+                        throw new Error(res.message);
+                    }
+                } catch (error) {
+                    return ctx.send({ message: error.message }, 400);
+                }
             }
-        } catch (error) {
-            console.log(error);
-            return ctx.send({ message: error.message }, 400);
+        } else {
+            // Check roles update
+            const allowUpdate = await checkPermission(
+                ctx,
+                strapi,
+                process.env.CAPACITY_UPDATE_DEVICE
+            );
+            if (!allowUpdate) {
+                ctx.send({ message: "You not allow update device", status: 403 }, 200);
+                return;
+            } else {
+                try {
+                    const resUpdate = await strapi.entityService.update(
+                        "plugin::radio.device",
+                        params,
+                        {
+                            data: {
+                                ...request.body,
+                            },
+                        }
+                    );
+                    return resUpdate
+                } catch (error) {
+                    return ctx.send({ message: error.message }, 400);
+                }
+            }
         }
     },
     async delete(ctx) {
@@ -268,16 +273,29 @@ module.exports = ({ strapi }) => ({
             return;
         }
         //
-        const response = strapi.entityService.update(
+        const response = await strapi.entityService.update(
             "plugin::radio.device",
             params, {
             data: {
                 publishedAt: null
             }
-        });
-
+        }
+        );
         //Hook delete device on socket
-        await deleteDeviceHook(response)
-        return response;
+        const deleteDevice = await deleteDeviceHook(response, ctx)
+
+        if (deleteDevice.status == 200) {
+            return ctx.send({ message: "Delete successfully", status: 200 }, 200)
+        } else {
+            await strapi.entityService.update(
+                "plugin::radio.device",
+                params, {
+                data: {
+                    publishedAt: new Date()
+                }
+            }
+            );
+            return ctx.send({ message: deleteDevice, status: 400 }, 200)
+        }
     },
 })
