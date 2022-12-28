@@ -60,6 +60,9 @@
             "type": "relation",
             "relation": "oneToOne",
             "target": "plugin::radio.user"
+        },
+        "version_apk": {
+            "type": "string"
         }
     }
 }
