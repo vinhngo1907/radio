@@ -25,6 +25,7 @@ const query = {
         "meta",
         "device_key",
         "phone_number",
+        "version_apk",
         "createdAt"
     ],
     filters: {
